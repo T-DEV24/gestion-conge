@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<!-- Déclaration du document HTML avec le namespace Thymeleaf -->
+<html xmlns:th="http://www.thymeleaf.org" lang="fr">
+<head>
+    <!-- Métadonnées pour le charset et la responsivité -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Titre de la page -->
+    <title>Demander un Congé | CongesApp</title>
+    <!-- Importation de Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Importation de Font Awesome pour les icônes -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Styles CSS personnalisés (issus des templates précédents) -->
+    <style>
+        /* Définition des variables CSS pour les couleurs */
+        :root {
+            --primary: #5D5CDE; /* Couleur principale (bleu) */
+            --primary-light: #e8e8ff; /* Couleur principale claire */
+            --accent-blue: #47B5FF; /* Couleur d'accent bleu */
+            --accent-green: #36AE7C; /* Couleur d'accent vert */
+            --accent-orange: #FF8F56; /* Couleur d'accent orange */
+            --accent-red: #FF5757; /* Couleur d'accent rouge */
+        }
+
+        /* Style général du corps de la page */
+        body {
+            background-color: #f8f9fa; /* Couleur de fond gris clair */
+            color: #333; /* Couleur du texte principale */
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; /* Police de caractère */
+        }
+
+        /* Style de la barre latérale (sidebar) */
+        .sidebar {
+            height: 100vh; /* Hauteur pleine */
+            position: sticky; /* Position fixe lors du défilement */
+            top: 0; /* Alignement en haut */
+            padding-top: 20px; /* Espacement interne en haut */
+            background-color: white; /* Fond blanc */
+            border-right: 1px solid #eee; /* Bordure droite légère */
+        }
+
+        /* Style des liens de navigation */
+        .nav-link {
+            padding: 0.5rem 1rem; /* Espacement interne */
+            color: #495057; /* Couleur du texte */
+            border-radius: 5px; /* Bordures arrondies */
+            margin: 2px 0; /* Marge verticale */
+        }
+
+        /* Effet au survol des liens */
+        .nav-link:hover {
+            background-color: var(--primary-light); /* Fond clair au survol */
+            color: var(--primary); /* Couleur du texte au survol */
+        }
+
+        /* Style des liens actifs */
+        .nav-link.active {
+            background-color: var(--primary); /* Fond de la couleur principale */
+            color: white; /* Texte blanc */
+        }
+
+        /* Style des icônes dans les liens de navigation */
+        .nav-link i {
+            width: 24px; /* Largeur fixe pour l'icône */
+            text-align: center; /* Centrage de l'icône */
+            margin-right: 8px; /* Marge à droite */
+        }
+
+        /* Style des messages d'erreur et de succès */
+        .error {
+            color: var(--accent-red); /* Couleur rouge pour les erreurs */
+            font-size: 0.9rem; /* Taille de police */
+            margin-top: 5px; /* Marge en haut */
+        }
+
+        .message {
+            color: var(--accent-green); /* Couleur verte pour les messages de succès */
+            font-size: 0.9rem; /* Taille de police */
+            margin-top: 5px; /* Marge en haut */
+        }
+
+        /* Style du formulaire */
+        .form-container {
+            background-color: white; /* Fond blanc */
+            border-radius: 10px; /* Bordures arrondies */
+            padding: 30px; /* Espacement interne */
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05); /* Ombre légère */
+        }
+
+        /* Style des champs de formulaire */
+        .form-control, .form-select {
+            border-radius: 5px; /* Bordures arrondies */
+            border: 1px solid #ced4da; /* Bordure grise */
+            transition: border-color 0.3s; /* Animation de transition */
+        }
+
+        /* Style des champs de formulaire au focus */
+        .form-control:focus, .form-select:focus {
+            border-color: var(--primary); /* Bordure de la couleur principale */
+            box-shadow: 0 0 5px rgba(93, 92, 222, 0.2); /* Ombre légère */
+        }
+
+        /* Style des étiquettes du formulaire */
+        .form-label {
+            font-weight: 500; /* Poids de la police */
+            color: #495057; /* Couleur du texte */
+        }
+
+        /* Style du bouton de soumission */
+        .btn-primary {
+            background-color: var(--primary); /* Couleur de fond */
+            border-color: var(--primary); /* Couleur de bordure */
+            border-radius: 5px; /* Bordures arrondies */
+            padding: 10px 20px; /* Espacement interne */
+            transition: background-color 0.3s; /* Animation de transition */
+        }
+
+        /* Effet au survol du bouton */
+        .btn-primary:hover {
+            background-color: #4A49B0; /* Couleur plus foncée au survol */
+            border-color: #4A49B0; /* Bordure plus foncée */
+        }
+
+        /* Style du bouton de retour */
+        .btn-outline-secondary {
+            border-radius: 5px; /* Bordures arrondies */
+            padding: 10px 20px; /* Espacement interne */
+        }
+
+        /* Style de l'en-tête */
+        header {
+            background-color: white; /* Fond blanc */
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05); /* Ombre légère */
+            padding: 20px 0; /* Espacement interne */
+            margin-bottom: 30px; /* Marge en bas */
+        }
+
+        /* Style du titre principal dans l'en-tête */
+        header h1 {
+            font-size: 1.5rem; /* Taille de police */
+            font-weight: 600; /* Poids de la police */
+            text-align: center; /* Centrage du texte */
+            margin: 0; /* Pas de marge */
+        }
+
+        /* Style du pied de page */
+        footer {
+            text-align: center; /* Centrage du texte */
+            padding: 20px 0; /* Espacement interne */
+            color: #6c757d; /* Couleur gris clair */
+            font-size: 0.9rem; /* Taille de police */
+            margin-top: 30px; /* Marge en haut */
+        }
+
+        /* Style de la section principale */
+        main {
+            padding: 0 15px; /* Espacement interne */
+        }
+
+        /* Style du titre de la section */
+        main h2 {
+            font-size: 1.75rem; /* Taille de police */
+            font-weight: 600; /* Poids de la police */
+            margin-bottom: 20px; /* Marge en bas */
+        }
+
+        /* Media query pour les écrans de petite taille */
+        @media (max-width: 992px) {
+            .sidebar {
+                height: auto; /* Hauteur automatique */
+                position: relative; /* Positionnement relatif */
+            }
+        }
+    </style>
+</head>
+<body>
+<!-- Conteneur principal avec grille Bootstrap -->
+<div class="container-fluid">
+    <div class="row">
+        <!-- Barre latérale (sidebar) visible sur les écrans larges -->
+        <div class="col-lg-2 px-0 d-none d-lg-block sidebar">
+            <!-- En-tête de la barre latérale avec le logo et le nom de l'application -->
+            <div class="d-flex align-items-center justify-content-center py-4">
+                <i class="fas fa-calendar-alt text-primary me-2 fs-4"></i>
+                <span class="fs-4 fw-semibold text-primary">CongesApp</span>
+            </div>
+            <hr class="mx-3">
+            <!-- Menu de navigation -->
+            <div class="nav flex-column px-3">
+                <a class="nav-link" th:href="@{/personnels/dashboard}">
+                    <i class="fas fa-tachometer-alt"></i> Tableau de bord
+                </a>
+                <a class="nav-link" th:href="@{/personnels/dashboard-personnel}">
+                    <i class="fas fa-user"></i> Mon Tableau Personnel
+                </a>
+                <a class="nav-link" th:href="@{/personnels}">
+                    <i class="fas fa-users"></i> Personnels
+                </a>
+                <a class="nav-link" th:href="@{/departements}">
+                    <i class="fas fa-building"></i> Départements
+                </a>
+                <a class="nav-link" th:href="@{/contrats}">
+                    <i class="fas fa-file-contract"></i> Contrats
+                </a>
+                <a class="nav-link active" th:href="@{/conges}">
+                    <i class="fas fa-umbrella-beach"></i> Congés
+                </a>
+                <hr>
+                <a class="nav-link" href="#">
+                    <i class="fas fa-cog"></i> Paramètres
+                </a>
+                <a class="nav-link" th:href="@{/}">
+                    <i class="fas fa-sign-out-alt"></i> Déconnexion
+                </a>
+            </div>
+        </div>
+
+        <!-- Contenu principal -->
+        <div class="col-lg-10 px-4 py-3">
+            <!-- En-tête -->
+            <header>
+                <h1>Application de Gestion des Congés</h1>
+            </header>
+
+            <!-- Section principale -->
+            <main>
+                <section>
+                    <!-- Titre de la section -->
+                    <h2>Demander un Congé</h2>
+                    <!-- Conteneur du formulaire -->
+                    <div class="form-container">
+                        <!-- Formulaire de demande de congé -->
+                        <form th:action="@{/conges/demander}" th:object="${congePayload}" method="post">
+                            <!-- Champ pour la durée maximale -->
+                            <div class="mb-3">
+                                <label for="dureeMax" class="form-label">Durée Maximale (HH:MM:SS) :</label>
+                                <select id="dureeMax" th:field="*{dureeMax}" class="form-select" required>
+                                    <option value="">Sélectionnez une durée</option>
+                                    <!-- Génération des options pour les heures de 00:00:00 à 23:00:00 -->
+                                    <option th:each="h : ${#numbers.sequence(0, 23)}"
+                                            th:value="${#numbers.formatInteger(h, 2) + ':00:00'}"
+                                            th:text="${#numbers.formatInteger(h, 2) + ':00:00'}"></option>
+                                </select>
+                                <span th:errors="*{dureeMax}" class="error"></span>
+                            </div>
+
+                            <!-- Champ pour le type de congé -->
+                            <div class="mb-3">
+                                <label for="type" class="form-label">Type de Congé :</label>
+                                <select id="type" th:field="*{type}" class="form-select" required>
+                                    <option value="PAYER">Payé</option>
+                                    <option value="NON_PAYER">Non Payé</option>
+                                </select>
+                                <span th:errors="*{type}" class="error"></span>
+                            </div>
+
+                            <!-- Champ pour l'ID du personnel -->
+                            <div class="mb-3">
+                                <label for="idPersonnel" class="form-label">ID Personnel :</label>
+                                <input type="number" id="idPersonnel" th:field="*{idPersonnel}" class="form-control" required />
+                                <span th:errors="*{idPersonnel}" class="error"></span>
+                            </div>
+
+                            <!-- Boutons d'action -->
+                            <div class="d-flex justify-content-between">
+                                <!-- Bouton de soumission -->
+                                <button type="submit" class="btn btn-primary">Soumettre la Demande</button>
+                                <!-- Bouton de retour -->
+                                <a th:href="@{/conges}" class="btn btn-outline-secondary">Retour à la liste</a>
+                            </div>
+                        </form>
+
+                        <!-- Affichage des messages de succès -->
+                        <div th:if="${message}" th:text="${message}" class="message"></div>
+                        <!-- Affichage des messages d'erreur -->
+                        <div th:if="${error}" th:text="${error}" class="error"></div>
+                    </div>
+                </section>
+            </main>
+
+            <!-- Pied de page -->
+            <footer>
+                <p>© 2025 - Application de Gestion des Congés</p>
+            </footer>
+        </div>
+    </div>
+</div>
+
+<!-- Importation des scripts Bootstrap -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

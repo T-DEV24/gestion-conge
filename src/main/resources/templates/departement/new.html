@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Créer un Département | CongesApp</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #5D5CDE;
+            --primary-light: #e8e8ff;
+            --accent-blue: #47B5FF;
+            --accent-green: #36AE7C;
+            --accent-orange: #FF8F56;
+            --accent-red: #FF5757;
+        }
+
+        body {
+            background-color: #f8f9fa;
+            color: #333;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .sidebar {
+            height: 100vh;
+            position: sticky;
+            top: 0;
+            padding-top: 20px;
+            background-color: white;
+            border-right: 1px solid #eee;
+        }
+
+        .nav-link {
+            padding: 0.5rem 1rem;
+            color: #495057;
+            border-radius: 5px;
+            margin: 2px 0;
+        }
+
+        .nav-link:hover {
+            background-color: var(--primary-light);
+            color: var(--primary);
+        }
+
+        .nav-link.active {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        .nav-link i {
+            width: 24px;
+            text-align: center;
+            margin-right: 8px;
+        }
+
+        .form-container {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            padding: 30px;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 500;
+            margin-bottom: 8px;
+            color: #495057;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ced4da;
+            border-radius: 5px;
+            font-size: 1rem;
+            color: #495057;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 5px rgba(93, 92, 222, 0.2);
+        }
+
+        .error {
+            color: var(--accent-red);
+            font-size: 0.9rem;
+            margin-top: 5px;
+            display: block;
+        }
+
+        .message {
+            color: var(--accent-green);
+            font-size: 0.9rem;
+            margin-top: 15px;
+        }
+
+        .btn-primary {
+            background-color: var(--primary);
+            border-color: var(--primary);
+            border-radius: 5px;
+            padding: 10px 20px;
+            transition: background-color 0.3s;
+        }
+
+        .btn-primary:hover {
+            background-color: #4A49B0;
+            border-color: #4A49B0;
+        }
+
+        .btn-secondary {
+            background-color: #6c757d;
+            border-color: #6c757d;
+            border-radius: 5px;
+            padding: 10px 20px;
+            transition: background-color 0.3s;
+            color: white;
+            text-decoration: none;
+        }
+
+        .btn-secondary:hover {
+            background-color: #5a6268;
+            border-color: #5a6268;
+        }
+
+        header {
+            background-color: white;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            padding: 20px 0;
+            margin-bottom: 30px;
+        }
+
+        header h1 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            text-align: center;
+            margin: 0;
+        }
+
+        footer {
+            text-align: center;
+            padding: 20px 0;
+            color: #6c757d;
+            font-size: 0.9rem;
+            margin-top: 30px;
+        }
+
+        main {
+            padding: 0 15px;
+        }
+
+        main h2 {
+            font-size: 1.75rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        @media (max-width: 992px) {
+            .sidebar {
+                height: auto;
+                position: relative;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-lg-2 px-0 d-none d-lg-block sidebar">
+            <div class="d-flex align-items-center justify-content-center py-4">
+                <i class="fas fa-calendar-alt text-primary me-2 fs-4"></i>
+                <span class="fs-4 fw-semibold text-primary">CongesApp</span>
+            </div>
+            <hr class="mx-3">
+            <div class="nav flex-column px-3">
+                <a class="nav-link" th:href="@{/personnels/dashboard}">
+                    <i class="fas fa-tachometer-alt"></i> Tableau de bord
+                </a>
+                <a class="nav-link" th:href="@{/personnels/dashboard-personnel}">
+                    <i class="fas fa-user"></i> Mon Tableau Personnel
+                </a>
+                <a class="nav-link" th:href="@{/personnels}">
+                    <i class="fas fa-users"></i> Personnels
+                </a>
+                <a class="nav-link active" th:href="@{/departements}">
+                    <i class="fas fa-building"></i> Départements
+                </a>
+                <a class="nav-link" th:href="@{/contrats}">
+                    <i class="fas fa-file-contract"></i> Contrats
+                </a>
+                <a class="nav-link" th:href="@{/conges}">
+                    <i class="fas fa-umbrella-beach"></i> Congés
+                </a>
+                <hr>
+                <a class="nav-link" href="#">
+                    <i class="fas fa-cog"></i> Paramètres
+                </a>
+                <a class="nav-link" th:href="@{/}">
+                    <i class="fas fa-sign-out-alt"></i> Déconnexion
+                </a>
+            </div>
+        </div>
+
+        <div class="col-lg-10 px-4 py-3">
+            <header>
+                <h1>Application de Gestion des Congés</h1>
+            </header>
+
+            <main>
+                <section>
+                    <h2>Créer un Département</h2>
+                    <div class="form-container">
+                        <form th:action="@{/departements/new}" th:object="${departementPayload}" method="post" onsubmit="return confirm('Êtes-vous sûr de vouloir créer ce département ?');">
+                            <div class="form-group">
+                                <label for="nom">Nom</label>
+                                <input type="text" id="nom" th:field="*{nom}" required />
+                                <span th:errors="*{nom}" class="error"></span>
+                            </div>
+                            <div class="form-group">
+                                <label for="adresse">Adresse</label>
+                                <input type="text" id="adresse" th:field="*{adresse}" />
+                                <span th:errors="*{adresse}" class="error"></span>
+                            </div>
+                            <div class="d-flex justify-content-between">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-plus me-1"></i> Créer
+                                </button>
+                                <a th:href="@{/departements}" class="btn btn-secondary">
+                                    <i class="fas fa-arrow-left me-1"></i> Retour à la liste
+                                </a>
+                            </div>
+                        </form>
+                        <div th:if="${message}" th:text="${message}" class="message"></div>
+                        <div th:if="${error}" th:text="${error}" class="error"></div>
+                    </div>
+                </section>
+            </main>
+
+            <footer>
+                <p>© 2025 - Application de Gestion des Congés</p>
+            </footer>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

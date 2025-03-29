@@ -1,0 +1,776 @@
+<!DOCTYPE html>
+<!-- Déclaration du document HTML avec le namespace Thymeleaf pour le traitement des templates -->
+<html xmlns:th="http://www.thymeleaf.org" lang="fr">
+<head>
+    <!-- Définition des métadonnées pour le charset et la responsivité -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Titre de la page, affiché dans l'onglet du navigateur -->
+    <title>Tableau de bord personnel | CongesApp</title>
+    <!-- Importation de Bootstrap CSS pour le style et la mise en page -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Importation de Font Awesome pour les icônes -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Importation de Chart.js pour créer des graphiques interactifs -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Section de styles CSS personnalisés -->
+    <style>
+        /* Définition des variables CSS pour les couleurs principales et secondaires */
+        :root {
+            --primary: #5D5CDE; /* Couleur principale (bleu) */
+            --primary-light: #e8e8ff; /* Couleur principale claire */
+            --accent-blue: #47B5FF; /* Couleur d'accent bleu */
+            --accent-green: #36AE7C; /* Couleur d'accent vert */
+            --accent-orange: #FF8F56; /* Couleur d'accent orange */
+            --accent-red: #FF5757; /* Couleur d'accent rouge */
+        }
+
+        /* Style général du corps de la page */
+        body {
+            background-color: #f8f9fa; /* Couleur de fond gris clair */
+            color: #333; /* Couleur du texte principale */
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; /* Police de caractère */
+        }
+
+        /* Style de la marque dans la barre de navigation */
+        .navbar-brand {
+            font-weight: 600; /* Poids de la police plus épais */
+        }
+
+        /* Style de la barre latérale (sidebar) */
+        .sidebar {
+            height: 100vh; /* Hauteur pleine pour occuper toute la fenêtre */
+            position: sticky; /* Position fixe lors du défilement */
+            top: 0; /* Alignement en haut */
+            padding-top: 20px; /* Espacement interne en haut */
+            background-color: white; /* Fond blanc */
+            border-right: 1px solid #eee; /* Bordure droite légère */
+        }
+
+        /* Style de l'en-tête de la barre latérale */
+        .sidebar-heading {
+            font-size: 1.2rem; /* Taille de police */
+            padding: 0.875rem 1.25rem; /* Espacement interne */
+            font-weight: 600; /* Poids de la police plus épais */
+        }
+
+        /* Style des liens de navigation dans la barre latérale */
+        .nav-link {
+            padding: 0.5rem 1rem; /* Espacement interne */
+            color: #495057; /* Couleur du texte */
+            border-radius: 5px; /* Bordures arrondies */
+            margin: 2px 0; /* Marge verticale */
+        }
+
+        /* Effet au survol des liens de navigation */
+        .nav-link:hover {
+            background-color: var(--primary-light); /* Fond clair au survol */
+            color: var(--primary); /* Couleur du texte au survol */
+        }
+
+        /* Style des liens actifs */
+        .nav-link.active {
+            background-color: var(--primary); /* Fond de la couleur principale */
+            color: white; /* Texte blanc */
+        }
+
+        /* Style des icônes dans les liens de navigation */
+        .nav-link i {
+            width: 24px; /* Largeur fixe pour l'icône */
+            text-align: center; /* Centrage de l'icône */
+            margin-right: 8px; /* Marge à droite */
+        }
+
+        /* Style des cartes de statistiques */
+        .stat-card {
+            border-radius: 10px; /* Bordures arrondies */
+            padding: 20px; /* Espacement interne */
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05); /* Ombre légère */
+            transition: transform 0.3s; /* Animation de transformation */
+            height: 100%; /* Hauteur pleine */
+        }
+
+        /* Effet au survol des cartes de statistiques */
+        .stat-card:hover {
+            transform: translateY(-5px); /* Déplacement vers le haut au survol */
+        }
+
+        /* Style des icônes dans les cartes de statistiques */
+        .stat-icon {
+            width: 60px; /* Largeur de l'icône */
+            height: 60px; /* Hauteur de l'icône */
+            border-radius: 50%; /* Forme circulaire */
+            display: flex; /* Utilisation de Flexbox */
+            align-items: center; /* Centrage vertical */
+            justify-content: center; /* Centrage horizontal */
+            font-size: 24px; /* Taille de l'icône */
+            margin-bottom: 15px; /* Marge en bas */
+        }
+
+        /* Styles pour différentes couleurs d'icônes de statistiques */
+        .stat-blue {
+            background-color: rgba(71, 181, 255, 0.1); /* Fond bleu clair */
+            color: var(--accent-blue); /* Couleur de l'icône */
+        }
+
+        .stat-green {
+            background-color: rgba(54, 174, 124, 0.1); /* Fond vert clair */
+            color: var(--accent-green); /* Couleur de l'icône */
+        }
+
+        .stat-orange {
+            background-color: rgba(255, 143, 86, 0.1); /* Fond orange clair */
+            color: var(--accent-orange); /* Couleur de l'icône */
+        }
+
+        .stat-purple {
+            background-color: rgba(93, 92, 222, 0.1); /* Fond violet clair */
+            color: var(--primary); /* Couleur de l'icône */
+        }
+
+        /* Style du nombre affiché dans les cartes de statistiques */
+        .stat-number {
+            font-size: 28px; /* Taille de police */
+            font-weight: 700; /* Poids de la police */
+            margin-bottom: 5px; /* Marge en bas */
+        }
+
+        /* Style de l'étiquette dans les cartes de statistiques */
+        .stat-label {
+            color: #6c757d; /* Couleur gris clair */
+            font-size: 14px; /* Taille de police */
+        }
+
+        /* Style de la bannière de bienvenue */
+        .welcome-banner {
+            background: linear-gradient(135deg, #fff, var(--primary-light)); /* Dégradé de fond */
+            border-radius: 10px; /* Bordures arrondies */
+            padding: 30px; /* Espacement interne */
+            position: relative; /* Positionnement relatif pour l'image */
+            overflow: hidden; /* Masque le débordement */
+            margin-bottom: 25px; /* Marge en bas */
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05); /* Ombre légère */
+        }
+
+        /* Style du texte dans la bannière de bienvenue */
+        .welcome-text {
+            max-width: 60%; /* Largeur maximale du texte */
+        }
+
+        /* Style de l'image dans la bannière de bienvenue */
+        .welcome-image {
+            position: absolute; /* Positionnement absolu */
+            right: 30px; /* Alignement à droite */
+            top: 50%; /* Centrage vertical */
+            transform: translateY(-50%); /* Ajustement du centrage vertical */
+            width: 200px; /* Largeur de l'image */
+            height: 200px; /* Hauteur de l'image */
+            background-image: url('data:image/svg+xml;base64,...'); /* Image SVG encodée en base64 */
+            background-size: contain; /* Ajustement de la taille de l'image */
+            background-repeat: no-repeat; /* Pas de répétition */
+            background-position: center; /* Centrage de l'image */
+        }
+
+        /* Style des cartes d'actions rapides */
+        .action-card {
+            border-radius: 10px; /* Bordures arrondies */
+            padding: 20px; /* Espacement interne */
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05); /* Ombre légère */
+            background-color: white; /* Fond blanc */
+            height: 100%; /* Hauteur pleine */
+            transition: transform 0.3s; /* Animation de transformation */
+        }
+
+        /* Effet au survol des cartes d'actions */
+        .action-card:hover {
+            transform: translateY(-5px); /* Déplacement vers le haut au survol */
+        }
+
+        /* Style des cartes de liens rapides */
+        .quick-link-card {
+            display: flex; /* Utilisation de Flexbox */
+            align-items: center; /* Centrage vertical */
+            padding: 15px; /* Espacement interne */
+            border-radius: 10px; /* Bordures arrondies */
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05); /* Ombre légère */
+            background-color: white; /* Fond blanc */
+            margin-bottom: 15px; /* Marge en bas */
+            transition: transform 0.3s; /* Animation de transformation */
+            text-decoration: none; /* Pas de soulignement */
+            color: #333; /* Couleur du texte */
+        }
+
+        /* Effet au survol des cartes de liens rapides */
+        .quick-link-card:hover {
+            transform: translateY(-3px); /* Déplacement vers le haut au survol */
+            background-color: var(--primary-light); /* Fond clair au survol */
+            color: var(--primary); /* Couleur du texte au survol */
+        }
+
+        /* Style des icônes dans les cartes de liens rapides */
+        .quick-link-icon {
+            width: 45px; /* Largeur de l'icône */
+            height: 45px; /* Hauteur de l'icône */
+            border-radius: 8px; /* Bordures arrondies */
+            display: flex; /* Utilisation de Flexbox */
+            align-items: center; /* Centrage vertical */
+            justify-content: center; /* Centrage horizontal */
+            font-size: 20px; /* Taille de l'icône */
+            margin-right: 15px; /* Marge à droite */
+            background-color: var(--primary-light); /* Fond clair */
+            color: var(--primary); /* Couleur de l'icône */
+        }
+
+        /* Effet au survol des icônes dans les cartes de liens rapides */
+        .quick-link-card:hover .quick-link-icon {
+            background-color: var(--primary); /* Fond de la couleur principale */
+            color: white; /* Couleur de l'icône */
+        }
+
+        /* Style de l'avatar de l'utilisateur dans la barre de navigation */
+        .user-avatar {
+            width: 40px; /* Largeur de l'avatar */
+            height: 40px; /* Hauteur de l'avatar */
+            border-radius: 50%; /* Forme circulaire */
+            background-color: var(--primary-light); /* Fond clair */
+            color: var(--primary); /* Couleur du texte */
+            display: flex; /* Utilisation de Flexbox */
+            align-items: center; /* Centrage vertical */
+            justify-content: center; /* Centrage horizontal */
+            font-weight: bold; /* Poids de la police */
+            font-size: 16px; /* Taille de police */
+            margin-right: 10px; /* Marge à droite */
+        }
+
+        /* Style du conteneur des graphiques */
+        .chart-container {
+            height: 300px; /* Hauteur du graphique */
+            width: 100%; /* Largeur pleine */
+        }
+
+        /* Style des éléments de congé dans la liste des congés à venir */
+        .leave-item {
+            padding: 15px; /* Espacement interne */
+            border-left: 4px solid var(--primary); /* Bordure gauche colorée */
+            background-color: white; /* Fond blanc */
+            border-radius: 6px; /* Bordures arrondies */
+            margin-bottom: 15px; /* Marge en bas */
+            transition: transform 0.2s; /* Animation de transformation */
+        }
+
+        /* Effet au survol des éléments de congé */
+        .leave-item:hover {
+            transform: translateX(5px); /* Déplacement vers la droite au survol */
+        }
+
+        /* Style des éléments de congé approuvés */
+        .leave-item.approved {
+            border-left-color: var(--accent-green); /* Bordure verte */
+        }
+
+        /* Style des éléments de congé en attente */
+        .leave-item.pending {
+            border-left-color: var(--accent-orange); /* Bordure orange */
+        }
+
+        /* Style des éléments de congé rejetés */
+        .leave-item.rejected {
+            border-left-color: var(--accent-red); /* Bordure rouge */
+        }
+
+        /* Style des dates dans les éléments de congé */
+        .leave-dates {
+            font-size: 14px; /* Taille de police */
+            color: #6c757d; /* Couleur gris clair */
+        }
+
+        /* Style de l'état des congés */
+        .leave-status {
+            font-size: 12px; /* Taille de police */
+            padding: 4px 8px; /* Espacement interne */
+            border-radius: 12px; /* Bordures arrondies */
+            font-weight: 500; /* Poids de la police */
+        }
+
+        /* Style de l'état approuvé */
+        .status-approved {
+            background-color: rgba(54, 174, 124, 0.1); /* Fond vert clair */
+            color: var(--accent-green); /* Couleur du texte */
+        }
+
+        /* Style de l'état en attente */
+        .status-pending {
+            background-color: rgba(255, 143, 86, 0.1); /* Fond orange clair */
+            color: var(--accent-orange); /* Couleur du texte */
+        }
+
+        /* Style de l'état rejeté */
+        .status-rejected {
+            background-color: rgba(255, 87, 87, 0.1); /* Fond rouge clair */
+            color: var(--accent-red); /* Couleur du texte */
+        }
+
+        /* Style des informations de profil */
+        .profile-info {
+            display: flex; /* Utilisation de Flexbox */
+            align-items: center; /* Centrage vertical */
+            margin-bottom: 20px; /* Marge en bas */
+        }
+
+        /* Style de l'avatar dans les informations de profil */
+        .profile-avatar {
+            width: 80px; /* Largeur de l'avatar */
+            height: 80px; /* Hauteur de l'avatar */
+            border-radius: 50%; /* Forme circulaire */
+            background-color: var(--primary-light); /* Fond clair */
+            color: var(--primary); /* Couleur du texte */
+            display: flex; /* Utilisation de Flexbox */
+            align-items: center; /* Centrage vertical */
+            justify-content: center; /* Centrage horizontal */
+            font-weight: bold; /* Poids de la police */
+            font-size: 32px; /* Taille de police */
+            margin-right: 20px; /* Marge à droite */
+        }
+
+        /* Style des détails dans les informations de profil */
+        .profile-details h4 {
+            margin-bottom: 5px; /* Marge en bas */
+        }
+
+        .profile-details p {
+            color: #6c757d; /* Couleur gris clair */
+            margin-bottom: 5px; /* Marge en bas */
+        }
+
+        /* Style du badge de département */
+        .badge-department {
+            background-color: var(--primary-light); /* Fond clair */
+            color: var(--primary); /* Couleur du texte */
+            font-weight: 500; /* Poids de la police */
+            padding: 6px 12px; /* Espacement interne */
+            border-radius: 20px; /* Bordures arrondies */
+        }
+
+        /* Media query pour les écrans de petite taille (responsive design) */
+        @media (max-width: 992px) {
+            .sidebar {
+                height: auto; /* Hauteur automatique */
+                position: relative; /* Positionnement relatif */
+            }
+            .welcome-image {
+                display: none; /* Masque l'image de bienvenue */
+            }
+            .welcome-text {
+                max-width: 100%; /* Largeur pleine du texte */
+            }
+        }
+    </style>
+</head>
+<body>
+<!-- Conteneur principal utilisant le système de grille Bootstrap -->
+<div class="container-fluid">
+    <div class="row">
+        <!-- Barre latérale (sidebar) visible sur les écrans larges -->
+        <div class="col-lg-2 px-0 d-none d-lg-block sidebar">
+            <!-- En-tête de la barre latérale avec le logo et le nom de l'application -->
+            <div class="d-flex align-items-center justify-content-center py-4">
+                <i class="fas fa-calendar-alt text-primary me-2 fs-4"></i>
+                <span class="fs-4 fw-semibold text-primary">CongesApp</span>
+            </div>
+            <hr class="mx-3">
+            <!-- Menu de navigation dans la barre latérale -->
+            <div class="nav flex-column px-3">
+                <a class="nav-link" th:href="@{/personnels/dashboard}">
+                    <i class="fas fa-tachometer-alt"></i> Tableau de bord
+                </a>
+                <a class="nav-link active" href="#">
+                    <i class="fas fa-user"></i> Mon Tableau Personnel
+                </a>
+                <a class="nav-link" th:href="@{/personnels}">
+                    <i class="fas fa-users"></i> Personnels
+                </a>
+                <a class="nav-link" th:href="@{/departements}">
+                    <i class="fas fa-building"></i> Départements
+                </a>
+                <a class="nav-link" th:href="@{/contrats}">
+                    <i class="fas fa-file-contract"></i> Contrats
+                </a>
+                <a class="nav-link" th:href="@{/conges}">
+                    <i class="fas fa-umbrella-beach"></i> Congés
+                </a>
+                <hr>
+                <a class="nav-link" href="#">
+                    <i class="fas fa-cog"></i> Paramètres
+                </a>
+                <a class="nav-link" th:href="@{/}">
+                    <i class="fas fa-sign-out-alt"></i> Déconnexion
+                </a>
+            </div>
+        </div>
+
+        <!-- Contenu principal -->
+        <div class="col-lg-10 px-4 py-3">
+            <!-- Barre de navigation supérieure -->
+            <nav class="navbar navbar-expand-lg navbar-light bg-white rounded mb-4 shadow-sm">
+                <div class="container-fluid">
+                    <!-- Bouton pour afficher le menu sur mobile -->
+                    <button class="navbar-toggler d-lg-none" type="button" data-bs-toggle="collapse" data-bs-target="#sidebarMenu">
+                        <span class="navbar-toggler-icon"></span>
+                    </button>
+                    <!-- Logo et nom de l'application sur mobile -->
+                    <div class="d-flex align-items-center d-lg-none">
+                        <i class="fas fa-calendar-alt text-primary me-2"></i>
+                        <span class="fw-semibold">CongesApp</span>
+                    </div>
+                    <!-- Menu utilisateur à droite -->
+                    <div class="d-flex align-items-center ms-auto">
+                        <div class="dropdown">
+                            <a class="btn btn-link dropdown-toggle p-0 d-flex align-items-center" href="#" role="button" id="userMenu" data-bs-toggle="dropdown" aria-expanded="false">
+                                <!-- Avatar de l'utilisateur avec ses initiales -->
+                                <div class="user-avatar">
+                                    <span th:text="${#strings.substring(user.prenom, 0, 1) + #strings.substring(user.nom, 0, 1)}"></span>
+                                </div>
+                                <!-- Nom complet de l'utilisateur (caché sur petits écrans) -->
+                                <span th:text="${user.prenom + ' ' + user.nom}" class="d-none d-sm-inline"></span>
+                            </a>
+                            <!-- Menu déroulant pour les options utilisateur -->
+                            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userMenu">
+                                <li><a class="dropdown-item" href="#">Mon profil</a></li>
+                                <li><a class="dropdown-item" href="#">Paramètres</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" href="#">Déconnexion</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </nav>
+
+            <!-- Contenu principal du tableau de bord -->
+            <!-- Bannière de bienvenue -->
+            <div class="welcome-banner">
+                <div class="welcome-text">
+                    <!-- Message de bienvenue personnalisé avec le prénom de l'utilisateur -->
+                    <h2>Votre espace personnel, <span th:text="${user.prenom}"></span> !</h2>
+                    <p class="mb-0">Gérez vos demandes de congés, consultez vos statistiques et accédez à toutes vos informations personnelles.</p>
+                </div>
+                <div class="welcome-image"></div>
+            </div>
+
+            <!-- Informations de profil -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-body">
+                    <div class="profile-info">
+                        <!-- Avatar de l'utilisateur avec ses initiales -->
+                        <div class="profile-avatar">
+                            <span th:text="${#strings.substring(user.prenom, 0, 1) + #strings.substring(user.nom, 0, 1)}"></span>
+                        </div>
+                        <div class="profile-details">
+                            <!-- Nom complet de l'utilisateur -->
+                            <h4 th:text="${user.prenom + ' ' + user.nom}">Nom complet</h4><br>
+                            <!-- Email de l'utilisateur -->
+                            <p><h4 th:text="${user.email}"></h4></p><br>
+                            <!-- Nom du département -->
+                            <h3>Département: </h3><br>
+                            <span class="badge-department" th:text="${departement}">Département</span>
+                        </div>
+                    </div>
+                    <!-- Bouton pour modifier le profil -->
+                    <div class="d-flex justify-content-end">
+                        <a th:href="@{/personnels/edit/{id}(id=${user.idPersonnel})}" class="btn btn-outline-primary btn-sm">
+                            <i class="fas fa-pencil-alt me-1"></i> Modifier mon profil
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Section des statistiques -->
+            <h4 class="mb-4">Mes statistiques</h4>
+            <div class="row g-4 mb-5">
+                <!-- Carte pour le département -->
+                <div class="col-md-4">
+                    <div class="stat-card bg-white">
+                        <div class="stat-icon stat-blue">
+                            <i class="fas fa-building"></i>
+                        </div>
+                        <div class="stat-number">1</div>
+                        <div class="stat-label">Département</div>
+                    </div>
+                </div>
+                <!-- Carte pour les contrats -->
+                <div class="col-md-4">
+                    <div class="stat-card bg-white">
+                        <div class="stat-icon stat-green">
+                            <i class="fas fa-file-contract"></i>
+                        </div>
+                        <div class="stat-number" th:text="${nbContrats}">0</div>
+                        <div class="stat-label">Contrats</div>
+                    </div>
+                </div>
+                <!-- Carte pour les congés -->
+                <div class="col-md-4">
+                    <div class="stat-card bg-white">
+                        <div class="stat-icon stat-orange">
+                            <i class="fas fa-umbrella-beach"></i>
+                        </div>
+                        <div class="stat-number" th:text="${nbConges}">0</div>
+                        <div class="stat-label">Congés</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row mb-4">
+                <!-- Graphique de l'historique des congés -->
+                <div class="col-lg-8 mb-4">
+                    <div class="card shadow-sm h-100">
+                        <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0">Historique des congés</h5>
+                            <!-- Boutons pour filtrer par année ou mois -->
+                            <div class="btn-group">
+                                <button class="btn btn-sm btn-outline-secondary active">Année</button>
+                                <button class="btn btn-sm btn-outline-secondary">Mois</button>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="chart-container">
+                                <canvas id="leaveHistoryChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Actions rapides -->
+                <div class="col-lg-4 mb-4">
+                    <div class="card shadow-sm h-100">
+                        <div class="card-header bg-white">
+                            <h5 class="mb-0">Actions rapides</h5>
+                        </div>
+                        <div class="card-body">
+                            <!-- Lien pour demander un congé -->
+                            <a th:href="@{/conges/demander}" class="quick-link-card">
+                                <div class="quick-link-icon">
+                                    <i class="fas fa-plus"></i>
+                                </div>
+                                <div>
+                                    <h6 class="mb-0">Demander un congé</h6>
+                                    <small class="text-muted">Créer une nouvelle demande</small>
+                                </div>
+                            </a>
+                            <!-- Lien pour consulter l'historique des congés -->
+                            <a href="#" class="quick-link-card">
+                                <div class="quick-link-icon">
+                                    <i class="fas fa-history"></i>
+                                </div>
+                                <div>
+                                    <h6 class="mb-0">Historique des congés</h6>
+                                    <small class="text-muted">Consulter mes demandes</small>
+                                </div>
+                            </a>
+                            <!-- Lien pour voir le solde de congés -->
+                            <a href="#" class="quick-link-card">
+                                <div class="quick-link-icon">
+                                    <i class="fas fa-calculator"></i>
+                                </div>
+                                <div>
+                                    <h6 class="mb-0">Solde de congés</h6>
+                                    <small class="text-muted">Voir mon solde actuel</small>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row mb-4">
+                <!-- Liste des congés à venir -->
+                <div class="col-lg-6 mb-4">
+                    <div class="card shadow-sm h-100">
+                        <div class="card-header bg-white">
+                            <h5 class="mb-0">Congés à venir</h5>
+                        </div>
+                        <div class="card-body">
+                            <!-- Exemple de congé approuvé -->
+                            <div class="leave-item approved">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <h6 class="mb-1">Congé annuel</h6>
+                                    <span class="leave-status status-approved">Approuvé</span>
+                                </div>
+                                <p class="leave-dates mb-1"><i class="far fa-calendar-alt me-1"></i> 15 Juil. 2025 - 30 Juil. 2025</p>
+                                <small class="text-muted">15 jours • Approuvé le 10 Mai 2025</small>
+                            </div>
+                            <!-- Exemple de congé en attente -->
+                            <div class="leave-item pending">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <h6 class="mb-1">Congé exceptionnel</h6>
+                                    <span class="leave-status status-pending">En attente</span>
+                                </div>
+                                <p class="leave-dates mb-1"><i class="far fa-calendar-alt me-1"></i> 5 Sep. 2025 - 7 Sep. 2025</p>
+                                <small class="text-muted">3 jours • Demandé le 15 Mai 2025</small>
+                            </div>
+                            <!-- Lien pour voir tout l'historique -->
+                            <div class="text-center mt-3">
+                                <a href="#" class="btn btn-outline-primary btn-sm">Voir tout l'historique</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Solde de congés -->
+                <div class="col-lg-6 mb-4">
+                    <div class="card shadow-sm h-100">
+                        <div class="card-header bg-white">
+                            <h5 class="mb-0">Solde de congés</h5>
+                        </div>
+                        <div class="card-body">
+                            <!-- Graphique en anneau pour le solde de congés -->
+                            <div class="chart-container" style="height: 250px;">
+                                <canvas id="leaveBalanceChart"></canvas>
+                            </div>
+                            <!-- Détails du solde -->
+                            <div class="mt-3">
+                                <div class="d-flex justify-content-between align-items-center py-2 border-bottom">
+                                    <span>Congés payés</span>
+                                    <span class="fw-bold">18 jours restants</span>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center py-2 border-bottom">
+                                    <span>RTT</span>
+                                    <span class="fw-bold">8 jours restants</span>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center py-2">
+                                    <span>Congés exceptionnels</span>
+                                    <span class="fw-bold">3 jours restants</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Liens supplémentaires -->
+            <div class="d-flex justify-content-between mt-4 mb-4">
+                <!-- Bouton pour retourner au tableau de bord global -->
+                <a th:href="@{/personnels/dashboard}" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left me-1"></i> Retour au tableau de bord global
+                </a>
+                <!-- Bouton pour demander un congé -->
+                <a th:href="@{/conges/demander}" class="btn btn-primary">
+                    <i class="fas fa-plus me-1"></i> Demander un congé
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Menu latéral pour mobile -->
+<div class="collapse d-lg-none" id="sidebarMenu">
+    <div class="bg-light p-4">
+        <div class="nav flex-column">
+            <a class="nav-link" th:href="@{/personnels/dashboard}">
+                <i class="fas fa-tachometer-alt"></i> Tableau de bord
+            </a>
+            <a class="nav-link active" href="#">
+                <i class="fas fa-user"></i> Mon Tableau Personnel
+            </a>
+            <a class="nav-link" th:href="@{/personnels}">
+                <i class="fas fa-users"></i> Personnels
+            </a>
+            <a class="nav-link" th:href="@{/departements}">
+                <i class="fas fa-building"></i> Départements
+            </a>
+            <a class="nav-link" th:href="@{/contrats}">
+                <i class="fas fa-file-contract"></i> Contrats
+            </a>
+            <a class="nav-link" th:href="@{/conges}">
+                <i class="fas fa-umbrella-beach"></i> Congés
+            </a>
+            <hr>
+            <a class="nav-link" href="#">
+                <i class="fas fa-cog"></i> Paramètres
+            </a>
+            <a class="nav-link" th:href="@{/}">
+                <i class="fas fa-sign-out-alt"></i> Déconnexion
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Importation des scripts Bootstrap -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<!-- Script pour initialiser les graphiques avec Chart.js -->
+<script>
+    // Événement déclenché lorsque le DOM est complètement chargé
+    document.addEventListener('DOMContentLoaded', function() {
+        // Graphique de l'historique des congés (type ligne)
+        const leaveHistoryCtx = document.getElementById('leaveHistoryChart').getContext('2d');
+        const leaveHistoryChart = new Chart(leaveHistoryCtx, {
+            type: 'line', // Type de graphique
+            data: {
+                labels: ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Juin', 'Juil', 'Août', 'Sep', 'Oct', 'Nov', 'Déc'], // Étiquettes des mois
+                datasets: [{
+                    label: 'Jours de congés pris', // Légende
+                    data: [0, 0, 3, 0, 2, 0, 15, 0, 3, 0, 0, 0], // Données statiques
+                    backgroundColor: 'rgba(93, 92, 222, 0.1)', // Couleur de fond
+                    borderColor: '#5D5CDE', // Couleur de la ligne
+                    borderWidth: 2, // Épaisseur de la ligne
+                    tension: 0.3, // Courbure de la ligne
+                    pointBackgroundColor: '#FFFFFF', // Couleur des points
+                    pointBorderColor: '#5D5CDE', // Couleur de la bordure des points
+                    pointBorderWidth: 2, // Épaisseur de la bordure des points
+                    pointRadius: 4, // Taille des points
+                    fill: true // Remplissage sous la ligne
+                }]
+            },
+            options: {
+                responsive: true, // Graphique responsive
+                maintainAspectRatio: false, // Ne pas maintenir le ratio d'aspect
+                plugins: {
+                    legend: {
+                        display: false // Masquer la légende
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true, // Commencer l'axe Y à 0
+                        grid: {
+                            drawBorder: false // Masquer la bordure de la grille
+                        }
+                    },
+                    x: {
+                        grid: {
+                            display: false // Masquer la grille de l'axe X
+                        }
+                    }
+                }
+            }
+        });
+
+        // Graphique du solde de congés (type anneau)
+        const leaveBalanceCtx = document.getElementById('leaveBalanceChart').getContext('2d');
+        const leaveBalanceChart = new Chart(leaveBalanceCtx, {
+            type: 'doughnut', // Type de graphique
+            data: {
+                labels: ['Pris', 'En attente', 'Disponible'], // Étiquettes
+                datasets: [{
+                    data: [7, 3, 18], // Données statiques
+                    backgroundColor: [
+                        '#5D5CDE', // Couleur pour "Pris"
+                        '#FF8F56', // Couleur pour "En attente"
+                        '#36AE7C' // Couleur pour "Disponible"
+                    ],
+                    borderWidth: 0 // Pas de bordure
+                }]
+            },
+            options: {
+                responsive: true, // Graphique responsive
+                maintainAspectRatio: false, // Ne pas maintenir le ratio d'aspect
+                plugins: {
+                    legend: {
+                        position: 'bottom', // Position de la légende
+                    }
+                },
+                cutout: '70%' // Taille du trou central
+            }
+        });
+    });
+</script>
+</body>
+</html>

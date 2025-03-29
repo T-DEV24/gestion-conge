@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tableau de bord | CongesApp</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --primary: #5D5CDE;
+            --primary-light: #e8e8ff;
+            --accent-blue: #47B5FF;
+            --accent-green: #36AE7C;
+            --accent-orange: #FF8F56;
+            --accent-red: #FF5757;
+        }
+
+        body {
+            background-color: #f8f9fa;
+            color: #333;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .navbar-brand {
+            font-weight: 600;
+        }
+
+        .sidebar {
+            height: 100vh;
+            position: sticky;
+            top: 0;
+            padding-top: 20px;
+            background-color: white;
+            border-right: 1px solid #eee;
+        }
+
+        .sidebar-heading {
+            font-size: 1.2rem;
+            padding: 0.875rem 1.25rem;
+            font-weight: 600;
+        }
+
+        .nav-link {
+            padding: 0.5rem 1rem;
+            color: #495057;
+            border-radius: 5px;
+            margin: 2px 0;
+        }
+
+        .nav-link:hover {
+            background-color: var(--primary-light);
+            color: var(--primary);
+        }
+
+        .nav-link.active {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        .nav-link i {
+            width: 24px;
+            text-align: center;
+            margin-right: 8px;
+        }
+
+        .stat-card {
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            transition: transform 0.3s;
+            height: 100%;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .stat-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            margin-bottom: 15px;
+        }
+
+        .stat-blue {
+            background-color: rgba(71, 181, 255, 0.1);
+            color: var(--accent-blue);
+        }
+
+        .stat-green {
+            background-color: rgba(54, 174, 124, 0.1);
+            color: var(--accent-green);
+        }
+
+        .stat-orange {
+            background-color: rgba(255, 143, 86, 0.1);
+            color: var(--accent-orange);
+        }
+
+        .stat-purple {
+            background-color: rgba(93, 92, 222, 0.1);
+            color: var(--primary);
+        }
+
+        .stat-number {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            color: #6c757d;
+            font-size: 14px;
+        }
+
+        .welcome-banner {
+            background: linear-gradient(135deg, #fff, var(--primary-light));
+            border-radius: 10px;
+            padding: 30px;
+            position: relative;
+            overflow: hidden;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        }
+
+        .welcome-text {
+            max-width: 60%;
+        }
+
+        .welcome-image {
+            position: absolute;
+            right: 30px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 200px;
+            height: 200px;
+            background-image: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIGRhdGEtbmFtZT0iTGF5ZXIgMSIgdmlld0JveD0iMCAwIDEyMy4zIDEyMyI+PHBhdGggZmlsbD0iI2U4ZThmZiIgZD0iTTkxLjEgMzEuOUgzMi4yYTYuNSA2LjUgMCAwMC02LjUgNi41djQ2LjJhNi41IDYuNSAwIDAwNi41IDYuNUg5MWE2LjUgNi41IDAgMDA2LjUtNi41VjM4LjRhNi41IDYuNSAwIDAwLTYuNC02LjV6Ii8+PHBhdGggZmlsbD0iIzVkNWNkZSIgZD0iTTU0LjggNTIuM2MwLTUuOSA0LjgtMTAuNyAxMC43LTEwLjdzMTAuNyA0LjggMTAuNyAxMC43LTQuOCAxMC43LTEwLjcgMTAuNy0xMC43LTQuOC0xMC43LTEwLjd6TTQ1LjQgODVsMi4zLTEwYzEtNC4yIDQuNy03LjEgOS03LjFoMTcuNmM0LjMgMCA4IDIuOSA5IDcuMWwyLjMgMTBINDUuNHoiLz48cGF0aCBmaWxsPSIjNWQ1Y2RlIiBkPSJNODkuOCA2OS44YzAgMS4xLS45IDItMiAySDM1LjZjLTEuMSAwLTItLjktMi0ycy45LTIgMi0yaDUyLjFjMS4yIDAgMi4xLjkgMi4xIDJ6TTg5LjggNzcuN2MwIDEuMS0uOSAyLTIgMkgzNS42Yy0xLjEgMC0yLS45LTItMnMuOS0yIDItMmg1Mi4xYzEuMiAwIDIuMS45IDIuMSAyek03OS44IDg1LjZjMCAxLjEtLjkgMi0yIDJINDUuNmMtMS4xIDAtMi0uOS0yLTJzLjktMiAyLTJoMzIuMWMxLjIgMCAyLjEuOSAyLjEgMnoiLz48L3N2Zz4=');
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+        }
+
+        .quick-link-card {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            background-color: white;
+            margin-bottom: 15px;
+            transition: transform 0.3s;
+            text-decoration: none;
+            color: #333;
+        }
+
+        .quick-link-card:hover {
+            transform: translateY(-3px);
+            background-color: var(--primary-light);
+            color: var(--primary);
+        }
+
+        .quick-link-icon {
+            width: 45px;
+            height: 45px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            margin-right: 15px;
+            background-color: var(--primary-light);
+            color: var(--primary);
+        }
+
+        .quick-link-card:hover .quick-link-icon {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: var(--primary-light);
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 16px;
+            margin-right: 10px;
+        }
+
+        .chart-container {
+            height: 300px;
+            width: 100%;
+        }
+
+        .announcement-card {
+            background-color: #fff;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            margin-bottom: 20px;
+        }
+
+        .announcement-date {
+            font-size: 12px;
+            color: #6c757d;
+        }
+
+        @media (max-width: 992px) {
+            .sidebar {
+                height: auto;
+                position: relative;
+            }
+            .welcome-image {
+                display: none;
+            }
+            .welcome-text {
+                max-width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar -->
+        <div class="col-lg-2 px-0 d-none d-lg-block sidebar">
+            <div class="d-flex align-items-center justify-content-center py-4">
+                <i class="fas fa-calendar-alt text-primary me-2 fs-4"></i>
+                <span class="fs-4 fw-semibold text-primary">CongesApp</span>
+            </div>
+            <hr class="mx-3">
+            <div class="nav flex-column px-3">
+                <a class="nav-link active" th:href="@{/personnels/dashboard}">
+                    <i class="fas fa-tachometer-alt"></i> Tableau de bord
+                </a>
+                <a class="nav-link" th:href="@{/personnels/dashboard-personnel}">
+                    <i class="fas fa-user"></i> Mon Tableau Personnel
+                </a>
+                <a class="nav-link" th:href="@{/personnels}">
+                    <i class="fas fa-users"></i> Personnels
+                </a>
+                <a class="nav-link" th:href="@{/departements}">
+                    <i class="fas fa-building"></i> Départements
+                </a>
+                <a class="nav-link" th:href="@{/contrats}">
+                    <i class="fas fa-file-contract"></i> Contrats
+                </a>
+                <a class="nav-link" th:href="@{/conges}">
+                    <i class="fas fa-umbrella-beach"></i> Congés
+                </a>
+                <hr>
+                <a class="nav-link" th:href="@{/}">
+                    <i class="fas fa-sign-out-alt"></i> Déconnexion
+                </a>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="col-lg-10 px-4 py-3">
+            <!-- Top Navbar -->
+            <nav class="navbar navbar-expand-lg navbar-light bg-white rounded mb-4 shadow-sm">
+                <div class="container-fluid">
+                    <button class="navbar-toggler d-lg-none" type="button" data-bs-toggle="collapse" data-bs-target="#sidebarMenu">
+                        <span class="navbar-toggler-icon"></span>
+                    </button>
+                    <div class="d-flex align-items-center d-lg-none">
+                        <i class="fas fa-calendar-alt text-primary me-2"></i>
+                        <span class="fw-semibold">CongesApp</span>
+                    </div>
+                    <div class="d-flex align-items-center ms-auto">
+                        <div class="dropdown">
+                            <a class="btn btn-link dropdown-toggle p-0 d-flex align-items-center" href="#" role="button" id="userMenu" data-bs-toggle="dropdown" aria-expanded="false">
+                                <div class="user-avatar">
+                                    <span th:text="${#strings.substring(user.prenom, 0, 1) + #strings.substring(user.nom, 0, 1)}"></span>
+                                </div>
+                                <span th:text="${user.prenom + ' ' + user.nom}" class="d-none d-sm-inline"></span>
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userMenu">
+                                <li><a class="dropdown-item" href="#">Mon profil</a></li>
+                                <li><a class="dropdown-item" href="#">Paramètres</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" th:href="@{/}">Déconnexion</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </nav>
+
+            <!-- Main Dashboard Content -->
+            <!-- Welcome Banner -->
+            <div class="welcome-banner">
+                <div class="welcome-text">
+                    <h2>Bienvenue, <span th:text="${user.prenom}"></span> !</h2>
+                    <p class="mb-0">Gérez les congés des employés de votre entreprise de manière efficace, intuitive et simple grâce à notre plateforme complète.</p>
+                </div>
+                <div class="welcome-image"></div>
+            </div>
+
+            <!-- Stats Cards -->
+            <h4 class="mb-4">Statistiques globales</h4>
+            <div class="row g-4 mb-5">
+                <div class="col-md-6 col-xl-3">
+                    <div class="stat-card bg-white">
+                        <div class="stat-icon stat-purple">
+                            <i class="fas fa-users"></i>
+                        </div>
+                        <div class="stat-number" th:text="${nbPersonnels}">0</div>
+                        <div class="stat-label">Personnels</div>
+                    </div>
+                </div>
+                <div class="col-md-6 col-xl-3">
+                    <div class="stat-card bg-white">
+                        <div class="stat-icon stat-blue">
+                            <i class="fas fa-building"></i>
+                        </div>
+                        <div class="stat-number" th:text="${nbDepartements}">0</div>
+                        <div class="stat-label">Départements</div>
+                    </div>
+                </div>
+                <div class="col-md-6 col-xl-3">
+                    <div class="stat-card bg-white">
+                        <div class="stat-icon stat-green">
+                            <i class="fas fa-file-contract"></i>
+                        </div>
+                        <div class="stat-number" th:text="${nbContrats}">0</div>
+                        <div class="stat-label">Contrats</div>
+                    </div>
+                </div>
+                <div class="col-md-6 col-xl-3">
+                    <div class="stat-card bg-white">
+                        <div class="stat-icon stat-orange">
+                            <i class="fas fa-umbrella-beach"></i>
+                        </div>
+                        <div class="stat-number" th:text="${nbConges}">0</div>
+                        <div class="stat-label">Congés</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row mb-4">
+                <!-- Charts -->
+                <div class="col-lg-8 mb-4">
+                    <div class="card shadow-sm">
+                        <div class="card-header bg-white">
+                            <h5 class="mb-0">Répartition des congés par mois</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="chart-container">
+                                <canvas id="congesChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Actions -->
+                <div class="col-lg-4 mb-4">
+                    <div class="card shadow-sm">
+                        <div class="card-header bg-white">
+                            <h5 class="mb-0">Actions rapides</h5>
+                        </div>
+                        <div class="card-body">
+                            <a th:href="@{/personnels/new}" class="quick-link-card">
+                                <div class="quick-link-icon">
+                                    <i class="fas fa-plus"></i>
+                                </div>
+                                <div>
+                                    <h6 class="mb-0">Nouveau personnel</h6>
+                                    <small class="text-muted">Ajouter un employé</small>
+                                </div>
+                            </a>
+                            <a th:href="@{/contrats/new}" class="quick-link-card">
+                                <div class="quick-link-icon">
+                                    <i class="fas fa-file-alt"></i>
+                                </div>
+                                <div>
+                                    <h6 class="mb-0">Nouveau contrat</h6>
+                                    <small class="text-muted">Créer un contrat</small>
+                                </div>
+                            </a>
+                            <a th:href="@{/conges/new}" class="quick-link-card">
+                                <div class="quick-link-icon">
+                                    <i class="fas fa-calendar-plus"></i>
+                                </div>
+                                <div>
+                                    <h6 class="mb-0">Nouvelle demande</h6>
+                                    <small class="text-muted">Demande de congé</small>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row mb-4">
+                <!-- Departments Distribution -->
+                <div class="col-lg-6 mb-4">
+                    <div class="card shadow-sm">
+                        <div class="card-header bg-white">
+                            <h5 class="mb-0">Répartition par département</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="chart-container" style="height: 250px;">
+                                <canvas id="departmentsChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Announcements -->
+                <div class="col-lg-6 mb-4">
+                    <div class="card shadow-sm">
+                        <div class="card-header bg-white">
+                            <h5 class="mb-0">Dernières annonces</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="announcement-card">
+                                <h6>Mise à jour du système</h6>
+                                <p class="announcement-date">Aujourd'hui</p>
+                                <p class="mb-0">Le système sera mis à jour ce weekend. De nouvelles fonctionnalités seront disponibles lundi.</p>
+                            </div>
+                            <div class="announcement-card">
+                                <h6>Jours fériés à venir</h6>
+                                <p class="announcement-date">Il y a 2 jours</p>
+                                <p class="mb-0">N'oubliez pas que le prochain jour férié est le 14 juillet. Planifiez vos congés en conséquence.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Mobile Sidebar Menu -->
+<div class="collapse d-lg-none" id="sidebarMenu">
+    <div class="bg-light p-4">
+        <div class="nav flex-column">
+            <a class="nav-link active" th:href="@{/personnels/dashboard}">
+                <i class="fas fa-tachometer-alt"></i> Tableau de bord
+            </a>
+            <a class="nav-link" th:href="@{/personnels/dashboard-personnel}">
+                <i class="fas fa-user"></i> Mon Tableau Personnel
+            </a>
+            <a class="nav-link" th:href="@{/personnels}">
+                <i class="fas fa-users"></i> Personnels
+            </a>
+            <a class="nav-link" th:href="@{/departements}">
+                <i class="fas fa-building"></i> Départements
+            </a>
+            <a class="nav-link" th:href="@{/contrats}">
+                <i class="fas fa-file-contract"></i> Contrats
+            </a>
+            <a class="nav-link" th:href="@{/conges}">
+                <i class="fas fa-umbrella-beach"></i> Congés
+            </a>
+            <hr>
+            <a class="nav-link" th:href="@{/}">
+                <i class="fas fa-sign-out-alt"></i> Déconnexion
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Bootstrap and other scripts -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    // Sample data for charts
+    document.addEventListener('DOMContentLoaded', function() {
+        // Monthly Leave Distribution Chart
+        const congesCtx = document.getElementById('congesChart').getContext('2d');
+        const congesChart = new Chart(congesCtx, {
+            type: 'bar',
+            data: {
+                labels: ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Juin', 'Juil', 'Août', 'Sep', 'Oct', 'Nov', 'Déc'],
+                datasets: [{
+                    label: 'Congés demandés',
+                    data: [12, 19, 8, 15, 24, 35, 40, 42, 20, 15, 12, 25],
+                    backgroundColor: 'rgba(93, 92, 222, 0.7)',
+                    borderColor: '#5D5CDE',
+                    borderWidth: 1
+                }, {
+                    label: 'Congés approuvés',
+                    data: [10, 15, 8, 12, 20, 30, 38, 40, 18, 13, 10, 22],
+                    backgroundColor: 'rgba(54, 174, 124, 0.7)',
+                    borderColor: '#36AE7C',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+
+        // Departments Distribution Chart
+        const deptCtx = document.getElementById('departmentsChart').getContext('2d');
+        const deptChart = new Chart(deptCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['RH', 'IT', 'Finance', 'Marketing', 'Ventes'],
+                datasets: [{
+                    data: [12, 19, 8, 15, 10],
+                    backgroundColor: [
+                        '#5D5CDE',
+                        '#47B5FF',
+                        '#36AE7C',
+                        '#FF8F56',
+                        '#FF5757'
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'right',
+                    }
+                }
+            }
+        });
+    });
+</script>
+</body>
+</html>
